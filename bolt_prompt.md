@@ -9,7 +9,8 @@ A demo interface for a trust analysis system that evaluates:
 
 TECH CONSTRAINTS:
 - Use only pure HTML, CSS, and vanilla JavaScript.
-- No frameworks, no libraries, no CDN dependencies.
+- You MAY import lucide icons via their official CDN for icons only.
+- No other frameworks or libraries.
 - Everything must run locally in the browser.
 - Organize code into:
   - index.html
@@ -52,26 +53,42 @@ Branding:
 - Subtitle under name: "Making trust inspectable"
 
 Layout:
-- Centered container with max-width
+- Centered container with max-width.
 - Card-based layout for:
   - Input area
   - Each result panel
-- Subtle shadows and rounded corners
-- Plenty of whitespace
+- Use soft shadows, layered depth, and rounded corners.
+- Maintain generous whitespace.
 
 Theme:
 - Light/Dark mode toggle in top-right corner.
 - Default to system preference.
 - Persist user preference in localStorage.
-- Light mode: white background, light gray cards, dark text.
-- Dark mode: near-black background, dark gray cards, light text.
+- Light mode:
+  - Soft off-white background with subtle gradient or noise texture.
+  - Cards in very light gray/white with gentle shadows.
+- Dark mode:
+  - Near-black background with subtle deep-blue or graphite gradient.
+  - Cards in dark charcoal with gentle highlights.
+
+Background:
+- Add a subtle multi-tone gradient or radial glow behind the main container.
+- Avoid busy or animated backgrounds.
 
 Typography:
 - Clear hierarchy: title > section headers > body text > muted helper text.
-- Professional sans-serif font stack (system fonts only).
+- Use system UI fonts only (no Google Fonts).
+
+Icons:
+- Use lucide icons consistently for:
+  - Input mode selector (text, image, audio, video)
+  - Analyze button
+  - Result panels
+  - Evidence and limitation lists
+- Icons should be subtle and muted, not colorful or dominant.
 
 Interactions:
-- Hover/focus states on buttons.
+- Hover/focus states on buttons and cards.
 - Smooth fade/slide animation when results appear.
 - Visual confidence indicator (progress bar or meter).
 
@@ -85,9 +102,9 @@ CONTENT:
 - Always show some uncertainty.
 
 DO NOT:
-- Add analytics, tracking, or external requests.
+- Add analytics, tracking, or external requests besides lucide.
 - Add backend code.
 - Add marketing fluff.
 - Add gamification, badges, or scores.
 
-The final result should look like a real professional product demo suitable for judges and stakeholders.
+The final result should look like a premium, trustworthy enterprise product demo suitable for judges and stakeholders.
