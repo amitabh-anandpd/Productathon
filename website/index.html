@@ -1,180 +1,188 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VeriTrust - AI & Truth Verification Platform</title>
-    <link rel="stylesheet" href="style.css">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ProofPols - Making trust inspectable</title>
+    <link rel="stylesheet" href="./style.css" />
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <meta property="og:image" content="https://bolt.new/static/og_default.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://bolt.new/static/og_default.png">
 </head>
-<body>
-    <header class="header">
-        <div class="container">
-            <div class="logo">
-                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M16 2L4 8V14C4 22 9 28 16 30C23 28 28 22 28 14V8L16 2Z" fill="#2563eb" stroke="#1e40af" stroke-width="2"/>
-                    <path d="M12 16L15 19L21 13" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                <span class="logo-text">VeriTrust</span>
+  <body>
+    <div class="theme-toggle">
+      <button id="themeToggle" aria-label="Toggle theme">
+        <i data-lucide="moon"></i>
+      </button>
+    </div>
+
+    <main class="container">
+      <header class="header">
+        <h1 class="title">ProofPols</h1>
+        <p class="subtitle">Making trust inspectable</p>
+      </header>
+
+      <section class="input-section card">
+        <h2 class="section-title">Input Content</h2>
+
+        <div class="input-modes">
+          <button class="mode-btn active" data-mode="text">
+            <i data-lucide="type"></i>
+            <span>Text</span>
+          </button>
+          <button class="mode-btn" data-mode="image">
+            <i data-lucide="image"></i>
+            <span>Image</span>
+          </button>
+          <button class="mode-btn" data-mode="audio">
+            <i data-lucide="mic"></i>
+            <span>Audio</span>
+          </button>
+          <button class="mode-btn" data-mode="video">
+            <i data-lucide="video"></i>
+            <span>Video</span>
+          </button>
+        </div>
+
+        <div class="input-area">
+          <div class="input-container active" data-input="text">
+            <textarea
+              id="textInput"
+              placeholder="Enter text content to analyze..."
+              rows="6"
+            ></textarea>
+          </div>
+
+          <div class="input-container" data-input="image">
+            <div class="file-upload">
+              <input type="file" id="imageInput" accept="image/*" />
+              <label for="imageInput" class="file-label">
+                <i data-lucide="upload"></i>
+                <span>Click to upload image</span>
+                <span class="file-hint">PNG, JPG, WebP up to 10MB</span>
+              </label>
+              <div class="file-preview" id="imagePreview"></div>
             </div>
-            <p class="tagline">Verify Authenticity & Truth with AI</p>
+          </div>
+
+          <div class="input-container" data-input="audio">
+            <div class="file-upload">
+              <input type="file" id="audioInput" accept="audio/*" />
+              <label for="audioInput" class="file-label">
+                <i data-lucide="upload"></i>
+                <span>Click to upload audio</span>
+                <span class="file-hint">MP3, WAV, OGG up to 50MB</span>
+              </label>
+              <div class="file-preview" id="audioPreview"></div>
+            </div>
+          </div>
+
+          <div class="input-container" data-input="video">
+            <div class="file-upload">
+              <input type="file" id="videoInput" accept="video/*" />
+              <label for="videoInput" class="file-label">
+                <i data-lucide="upload"></i>
+                <span>Click to upload video</span>
+                <span class="file-hint">MP4, WebM, MOV up to 100MB</span>
+              </label>
+              <div class="file-preview" id="videoPreview"></div>
+            </div>
+          </div>
         </div>
-    </header>
 
-    <main class="main">
-        <div class="container">
-            <section id="input-section" class="input-section">
-                <h1 class="main-title">Analyze Content Authenticity & Truthfulness</h1>
-                <p class="subtitle">Upload or paste content to verify if it's AI-generated and check its factual accuracy</p>
+        <button class="analyze-btn" id="analyzeBtn">
+          <i data-lucide="search"></i>
+          <span>Analyze</span>
+        </button>
 
-                <div class="input-tabs">
-                    <button class="tab-btn active" data-tab="text">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                            <polyline points="14 2 14 8 20 8"></polyline>
-                        </svg>
-                        Text
-                    </button>
-                    <button class="tab-btn" data-tab="file">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                            <polyline points="17 8 12 3 7 8"></polyline>
-                            <line x1="12" y1="3" x2="12" y2="15"></line>
-                        </svg>
-                        Upload File
-                    </button>
-                </div>
-
-                <div class="input-content">
-                    <div id="text-input" class="tab-panel active">
-                        <textarea
-                            id="text-area"
-                            class="text-input"
-                            placeholder="Paste your text here to analyze its authenticity and truthfulness...&#10;&#10;Example: News articles, social media posts, quotes, or any written content."
-                        ></textarea>
-                    </div>
-
-                    <div id="file-input" class="tab-panel">
-                        <div class="upload-area" id="upload-area">
-                            <input type="file" id="file-input-element" accept="image/*,audio/*,video/*" hidden>
-                            <svg class="upload-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                <polyline points="17 8 12 3 7 8"></polyline>
-                                <line x1="12" y1="3" x2="12" y2="15"></line>
-                            </svg>
-                            <p class="upload-text">Drag & drop your file here</p>
-                            <p class="upload-subtext">or click to browse</p>
-                            <p class="upload-formats">Supports: Images, Audio, Video</p>
-                        </div>
-                        <div id="file-preview" class="file-preview" style="display: none;">
-                            <div class="file-info">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
-                                    <polyline points="13 2 13 9 20 9"></polyline>
-                                </svg>
-                                <div class="file-details">
-                                    <p class="file-name" id="file-name"></p>
-                                    <p class="file-size" id="file-size"></p>
-                                </div>
-                                <button class="remove-file" id="remove-file">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <button id="analyze-btn" class="analyze-btn">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                    </svg>
-                    Analyze Content
-                </button>
-            </section>
-
-            <section id="loading-section" class="loading-section" style="display: none;">
-                <div class="loading-container">
-                    <div class="loading-spinner"></div>
-                    <h2 class="loading-title">Analyzing Content</h2>
-                    <p class="loading-text" id="loading-text">Initializing analysis...</p>
-                    <div class="loading-progress">
-                        <div class="progress-bar" id="progress-bar"></div>
-                    </div>
-                </div>
-            </section>
-
-            <section id="results-section" class="results-section" style="display: none;">
-                <div class="results-header">
-                    <h2 class="results-title">Analysis Results</h2>
-                    <button id="new-analysis-btn" class="new-analysis-btn">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="1 4 1 10 7 10"></polyline>
-                            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
-                        </svg>
-                        New Analysis
-                    </button>
-                </div>
-
-                <div class="results-grid">
-                    <div class="result-panel authenticity-panel">
-                        <div class="panel-header">
-                            <div class="panel-icon authenticity-icon">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
-                                    <path d="M2 17l10 5 10-5"></path>
-                                    <path d="M2 12l10 5 10-5"></path>
-                                </svg>
-                            </div>
-                            <h3 class="panel-title">Authenticity Analysis</h3>
-                        </div>
-                        <div class="verdict-container">
-                            <div class="verdict" id="authenticity-verdict">Likely Real</div>
-                            <div class="confidence-bar">
-                                <div class="confidence-fill" id="authenticity-confidence-fill"></div>
-                            </div>
-                            <div class="confidence-label" id="authenticity-confidence">85% Confidence</div>
-                        </div>
-                        <div class="evidence-section">
-                            <h4 class="evidence-title">Evidence</h4>
-                            <div class="evidence-timeline" id="authenticity-evidence"></div>
-                        </div>
-                    </div>
-
-                    <div class="result-panel truthfulness-panel">
-                        <div class="panel-header">
-                            <div class="panel-icon truthfulness-icon">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                                </svg>
-                            </div>
-                            <h3 class="panel-title">Truthfulness Analysis</h3>
-                        </div>
-                        <div class="verdict-container">
-                            <div class="verdict" id="truthfulness-verdict">Likely True</div>
-                            <div class="confidence-bar">
-                                <div class="confidence-fill" id="truthfulness-confidence-fill"></div>
-                            </div>
-                            <div class="confidence-label" id="truthfulness-confidence">78% Confidence</div>
-                        </div>
-                        <div class="evidence-section">
-                            <h4 class="evidence-title">Evidence</h4>
-                            <div class="evidence-timeline" id="truthfulness-evidence"></div>
-                        </div>
-                    </div>
-                </div>
-            </section>
+        <div class="loading-spinner" id="loadingSpinner">
+          <div class="spinner"></div>
+          <p>Analyzing content...</p>
         </div>
+      </section>
+
+      <section class="results-section" id="resultsSection">
+        <div class="results-grid">
+          <div class="result-panel card">
+            <div class="panel-header">
+              <i data-lucide="shield"></i>
+              <h3>Authenticity</h3>
+            </div>
+
+            <div class="verdict" id="authenticityVerdict">
+              <span class="verdict-label">Verdict:</span>
+              <span class="verdict-value"></span>
+            </div>
+
+            <div class="confidence">
+              <div class="confidence-header">
+                <span>Confidence</span>
+                <span class="confidence-value" id="authenticityConfidence">0%</span>
+              </div>
+              <div class="confidence-bar">
+                <div class="confidence-fill" id="authenticityBar"></div>
+              </div>
+            </div>
+
+            <div class="evidence-section">
+              <h4>
+                <i data-lucide="check-circle"></i>
+                Evidence
+              </h4>
+              <ul class="evidence-list" id="authenticityEvidence"></ul>
+            </div>
+
+            <div class="limitations-section">
+              <h4>
+                <i data-lucide="alert-circle"></i>
+                Limitations
+              </h4>
+              <ul class="limitations-list" id="authenticityLimitations"></ul>
+            </div>
+          </div>
+
+          <div class="result-panel card">
+            <div class="panel-header">
+              <i data-lucide="check-square"></i>
+              <h3>Credibility</h3>
+            </div>
+
+            <div class="verdict" id="credibilityVerdict">
+              <span class="verdict-label">Verdict:</span>
+              <span class="verdict-value"></span>
+            </div>
+
+            <div class="confidence">
+              <div class="confidence-header">
+                <span>Confidence</span>
+                <span class="confidence-value" id="credibilityConfidence">0%</span>
+              </div>
+              <div class="confidence-bar">
+                <div class="confidence-fill" id="credibilityBar"></div>
+              </div>
+            </div>
+
+            <div class="evidence-section">
+              <h4>
+                <i data-lucide="check-circle"></i>
+                Evidence
+              </h4>
+              <ul class="evidence-list" id="credibilityEvidence"></ul>
+            </div>
+
+            <div class="limitations-section">
+              <h4>
+                <i data-lucide="alert-circle"></i>
+                Limitations
+              </h4>
+              <ul class="limitations-list" id="credibilityLimitations"></ul>
+            </div>
+          </div>
+        </div>
+      </section>
     </main>
 
-    <footer class="footer">
-        <div class="container">
-            <p>&copy; 2024 VeriTrust. Advanced AI-powered verification technology.</p>
-        </div>
-    </footer>
-
-    <script src="app.js"></script>
-</body>
+    <script src="./app.js"></script>
+  </body>
 </html>

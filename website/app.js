@@ -1,388 +1,396 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const tabButtons = document.querySelectorAll('.tab-btn');
-    const tabPanels = document.querySelectorAll('.tab-panel');
-    const uploadArea = document.getElementById('upload-area');
-    const fileInput = document.getElementById('file-input-element');
-    const filePreview = document.getElementById('file-preview');
-    const removeFileBtn = document.getElementById('remove-file');
-    const analyzeBtn = document.getElementById('analyze-btn');
-    const newAnalysisBtn = document.getElementById('new-analysis-btn');
+const themeToggle = document.getElementById('themeToggle');
+const analyzeBtn = document.getElementById('analyzeBtn');
+const loadingSpinner = document.getElementById('loadingSpinner');
+const resultsSection = document.getElementById('resultsSection');
 
-    const inputSection = document.getElementById('input-section');
-    const loadingSection = document.getElementById('loading-section');
-    const resultsSection = document.getElementById('results-section');
+const modeBtns = document.querySelectorAll('.mode-btn');
+const inputContainers = document.querySelectorAll('.input-container');
 
-    let currentFile = null;
-    let currentInputType = 'text';
+const textInput = document.getElementById('textInput');
+const imageInput = document.getElementById('imageInput');
+const audioInput = document.getElementById('audioInput');
+const videoInput = document.getElementById('videoInput');
 
-    tabButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            const targetTab = button.dataset.tab;
-            currentInputType = targetTab;
+const imagePreview = document.getElementById('imagePreview');
+const audioPreview = document.getElementById('audioPreview');
+const videoPreview = document.getElementById('videoPreview');
 
-            tabButtons.forEach(btn => btn.classList.remove('active'));
-            tabPanels.forEach(panel => panel.classList.remove('active'));
+let currentMode = 'text';
+let currentFile = null;
 
-            button.classList.add('active');
-            document.getElementById(`${targetTab}-input`).classList.add('active');
-        });
-    });
+function initTheme() {
+  const savedTheme = localStorage.getItem('theme');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
-    uploadArea.addEventListener('click', () => {
-        fileInput.click();
-    });
+  if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    updateThemeIcon('sun');
+  } else {
+    document.documentElement.setAttribute('data-theme', 'light');
+    updateThemeIcon('moon');
+  }
+}
 
-    uploadArea.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        uploadArea.classList.add('drag-over');
-    });
+function updateThemeIcon(icon) {
+  const iconElement = themeToggle.querySelector('i');
+  iconElement.setAttribute('data-lucide', icon);
+  lucide.createIcons();
+}
 
-    uploadArea.addEventListener('dragleave', () => {
-        uploadArea.classList.remove('drag-over');
-    });
+themeToggle.addEventListener('click', () => {
+  const currentTheme = document.documentElement.getAttribute('data-theme');
+  const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
 
-    uploadArea.addEventListener('drop', (e) => {
-        e.preventDefault();
-        uploadArea.classList.remove('drag-over');
-
-        const files = e.dataTransfer.files;
-        if (files.length > 0) {
-            handleFile(files[0]);
-        }
-    });
-
-    fileInput.addEventListener('change', (e) => {
-        if (e.target.files.length > 0) {
-            handleFile(e.target.files[0]);
-        }
-    });
-
-    removeFileBtn.addEventListener('click', () => {
-        currentFile = null;
-        fileInput.value = '';
-        filePreview.style.display = 'none';
-        uploadArea.style.display = 'block';
-    });
-
-    analyzeBtn.addEventListener('click', () => {
-        if (currentInputType === 'text') {
-            const textContent = document.getElementById('text-area').value.trim();
-            if (!textContent) {
-                alert('Please enter some text to analyze.');
-                return;
-            }
-            performAnalysis({ type: 'text', content: textContent });
-        } else {
-            if (!currentFile) {
-                alert('Please upload a file to analyze.');
-                return;
-            }
-            performAnalysis({ type: 'file', file: currentFile });
-        }
-    });
-
-    newAnalysisBtn.addEventListener('click', () => {
-        resetToInput();
-    });
-
-    function handleFile(file) {
-        const validTypes = ['image/', 'audio/', 'video/'];
-        const isValid = validTypes.some(type => file.type.startsWith(type));
-
-        if (!isValid) {
-            alert('Please upload a valid image, audio, or video file.');
-            return;
-        }
-
-        currentFile = file;
-
-        document.getElementById('file-name').textContent = file.name;
-        document.getElementById('file-size').textContent = formatFileSize(file.size);
-
-        uploadArea.style.display = 'none';
-        filePreview.style.display = 'block';
-    }
-
-    function formatFileSize(bytes) {
-        if (bytes === 0) return '0 Bytes';
-        const k = 1024;
-        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
-    }
-
-    async function performAnalysis(data) {
-        inputSection.style.display = 'none';
-        loadingSection.style.display = 'block';
-        resultsSection.style.display = 'none';
-
-        const loadingSteps = [
-            'Initializing analysis...',
-            'Processing content...',
-            'Analyzing patterns...',
-            'Checking authenticity markers...',
-            'Verifying factual claims...',
-            'Cross-referencing sources...',
-            'Calculating confidence scores...',
-            'Finalizing results...'
-        ];
-
-        const progressBar = document.getElementById('progress-bar');
-        const loadingText = document.getElementById('loading-text');
-
-        let currentStep = 0;
-        const stepDuration = 600;
-
-        const interval = setInterval(() => {
-            if (currentStep < loadingSteps.length) {
-                loadingText.textContent = loadingSteps[currentStep];
-                progressBar.style.width = ((currentStep + 1) / loadingSteps.length * 100) + '%';
-                currentStep++;
-            } else {
-                clearInterval(interval);
-            }
-        }, stepDuration);
-
-        setTimeout(() => {
-            clearInterval(interval);
-            const results = generateMockResults(data);
-            displayResults(results);
-        }, stepDuration * loadingSteps.length);
-    }
-
-    function generateMockResults(data) {
-        const contentType = data.type === 'text' ? 'text' :
-                          data.file?.type.startsWith('image/') ? 'image' :
-                          data.file?.type.startsWith('audio/') ? 'audio' : 'video';
-
-        const mockScenarios = [
-            {
-                authenticity: {
-                    verdict: 'Likely Real',
-                    confidence: 87,
-                    evidence: [
-                        { text: 'Natural language patterns detected', type: 'positive' },
-                        { text: 'Human-like writing inconsistencies present', type: 'positive' },
-                        { text: 'No repetitive AI sentence structures found', type: 'positive' },
-                        { text: 'Varied vocabulary usage typical of human authors', type: 'positive' }
-                    ]
-                },
-                truthfulness: {
-                    verdict: 'Likely True',
-                    confidence: 82,
-                    evidence: [
-                        { text: 'Claims align with verified sources', type: 'positive' },
-                        { text: 'Statistical data matches public records', type: 'positive' },
-                        { text: 'Timeline of events is logically consistent', type: 'positive' },
-                        { text: 'Minor discrepancy in one date reference', type: 'negative' }
-                    ]
-                }
-            },
-            {
-                authenticity: {
-                    verdict: 'Likely AI',
-                    confidence: 91,
-                    evidence: [
-                        { text: 'Repetitive sentence structure patterns detected', type: 'negative' },
-                        { text: 'Overly formal tone throughout content', type: 'negative' },
-                        { text: 'Generic vocabulary common in AI-generated text', type: 'negative' },
-                        { text: 'Lacks personal anecdotes or unique perspectives', type: 'negative' }
-                    ]
-                },
-                truthfulness: {
-                    verdict: 'Mixed',
-                    confidence: 65,
-                    evidence: [
-                        { text: 'Some factual statements verified', type: 'positive' },
-                        { text: 'Several unverifiable claims present', type: 'negative' },
-                        { text: 'Context missing for key assertions', type: 'neutral' },
-                        { text: 'Dates and statistics partially accurate', type: 'neutral' }
-                    ]
-                }
-            },
-            {
-                authenticity: {
-                    verdict: 'Mixed',
-                    confidence: 73,
-                    evidence: [
-                        { text: 'Combination of human and AI-like patterns', type: 'neutral' },
-                        { text: 'Some sections show natural flow', type: 'positive' },
-                        { text: 'Other sections have AI-typical structure', type: 'negative' },
-                        { text: 'Possible human editing of AI content', type: 'neutral' }
-                    ]
-                },
-                truthfulness: {
-                    verdict: 'Likely False',
-                    confidence: 79,
-                    evidence: [
-                        { text: 'Multiple claims contradict verified sources', type: 'negative' },
-                        { text: 'Timeline inconsistencies detected', type: 'negative' },
-                        { text: 'Statistics appear manipulated or fabricated', type: 'negative' },
-                        { text: 'One minor claim verified as accurate', type: 'positive' }
-                    ]
-                }
-            },
-            {
-                authenticity: {
-                    verdict: 'Uncertain',
-                    confidence: 58,
-                    evidence: [
-                        { text: 'Insufficient content length for confident analysis', type: 'neutral' },
-                        { text: 'Mixed indicators present', type: 'neutral' },
-                        { text: 'Some characteristics typical of both human and AI', type: 'neutral' },
-                        { text: 'Further analysis recommended', type: 'neutral' }
-                    ]
-                },
-                truthfulness: {
-                    verdict: 'Uncertain',
-                    confidence: 52,
-                    evidence: [
-                        { text: 'Limited verifiable claims to analyze', type: 'neutral' },
-                        { text: 'Content is largely opinion-based', type: 'neutral' },
-                        { text: 'No major red flags detected', type: 'positive' },
-                        { text: 'Context needed for proper verification', type: 'neutral' }
-                    ]
-                }
-            }
-        ];
-
-        if (contentType === 'image') {
-            return {
-                authenticity: {
-                    verdict: 'Likely Real',
-                    confidence: 84,
-                    evidence: [
-                        { text: 'Natural lighting patterns consistent', type: 'positive' },
-                        { text: 'No AI artifact patterns detected in pixels', type: 'positive' },
-                        { text: 'Metadata indicates genuine camera source', type: 'positive' },
-                        { text: 'Minor editing detected in background area', type: 'negative' }
-                    ]
-                },
-                truthfulness: {
-                    verdict: 'Likely True',
-                    confidence: 76,
-                    evidence: [
-                        { text: 'Image location verified through landmarks', type: 'positive' },
-                        { text: 'Time of day matches shadow analysis', type: 'positive' },
-                        { text: 'No signs of composite manipulation', type: 'positive' },
-                        { text: 'Cannot verify all contextual claims', type: 'neutral' }
-                    ]
-                }
-            };
-        } else if (contentType === 'audio') {
-            return {
-                authenticity: {
-                    verdict: 'Likely Real',
-                    confidence: 89,
-                    evidence: [
-                        { text: 'Natural voice patterns and intonation', type: 'positive' },
-                        { text: 'Background ambient noise present', type: 'positive' },
-                        { text: 'No AI voice synthesis markers detected', type: 'positive' },
-                        { text: 'Voice matches known speaker characteristics', type: 'positive' }
-                    ]
-                },
-                truthfulness: {
-                    verdict: 'Mixed',
-                    confidence: 68,
-                    evidence: [
-                        { text: 'Some statements align with known facts', type: 'positive' },
-                        { text: 'Exaggeration detected in several claims', type: 'negative' },
-                        { text: 'Context suggests partial information', type: 'neutral' },
-                        { text: 'Speaker credibility cannot be fully verified', type: 'neutral' }
-                    ]
-                }
-            };
-        } else if (contentType === 'video') {
-            return {
-                authenticity: {
-                    verdict: 'Likely AI',
-                    confidence: 86,
-                    evidence: [
-                        { text: 'Unnatural facial micro-expressions detected', type: 'negative' },
-                        { text: 'Lip-sync inconsistencies in multiple frames', type: 'negative' },
-                        { text: 'Background shows signs of AI generation', type: 'negative' },
-                        { text: 'Temporal artifacts typical of deepfake technology', type: 'negative' }
-                    ]
-                },
-                truthfulness: {
-                    verdict: 'Likely False',
-                    confidence: 81,
-                    evidence: [
-                        { text: 'Claims made contradict verified events', type: 'negative' },
-                        { text: 'Manipulated to present false narrative', type: 'negative' },
-                        { text: 'Original source content appears altered', type: 'negative' },
-                        { text: 'Context completely changed from original', type: 'negative' }
-                    ]
-                }
-            };
-        }
-
-        const randomScenario = mockScenarios[Math.floor(Math.random() * mockScenarios.length)];
-        return randomScenario;
-    }
-
-    function displayResults(results) {
-        loadingSection.style.display = 'none';
-        resultsSection.style.display = 'block';
-
-        const authenticityVerdict = document.getElementById('authenticity-verdict');
-        const authenticityConfidence = document.getElementById('authenticity-confidence');
-        const authenticityConfidenceFill = document.getElementById('authenticity-confidence-fill');
-        const authenticityEvidence = document.getElementById('authenticity-evidence');
-
-        const truthfulnessVerdict = document.getElementById('truthfulness-verdict');
-        const truthfulnessConfidence = document.getElementById('truthfulness-confidence');
-        const truthfulnessConfidenceFill = document.getElementById('truthfulness-confidence-fill');
-        const truthfulnessEvidence = document.getElementById('truthfulness-evidence');
-
-        authenticityVerdict.textContent = results.authenticity.verdict;
-        authenticityVerdict.className = 'verdict ' + results.authenticity.verdict.toLowerCase().replace(/ /g, '-');
-        authenticityConfidence.textContent = `${results.authenticity.confidence}% Confidence`;
-
-        setTimeout(() => {
-            authenticityConfidenceFill.style.width = `${results.authenticity.confidence}%`;
-        }, 100);
-
-        authenticityEvidence.innerHTML = '';
-        results.authenticity.evidence.forEach((item, index) => {
-            const evidenceItem = document.createElement('div');
-            evidenceItem.className = 'evidence-item';
-            evidenceItem.style.animationDelay = `${index * 0.1}s`;
-            evidenceItem.innerHTML = `<p class="evidence-text evidence-${item.type}">${item.text}</p>`;
-            authenticityEvidence.appendChild(evidenceItem);
-        });
-
-        truthfulnessVerdict.textContent = results.truthfulness.verdict;
-        truthfulnessVerdict.className = 'verdict ' + results.truthfulness.verdict.toLowerCase().replace(/ /g, '-');
-        truthfulnessConfidence.textContent = `${results.truthfulness.confidence}% Confidence`;
-
-        setTimeout(() => {
-            truthfulnessConfidenceFill.style.width = `${results.truthfulness.confidence}%`;
-        }, 100);
-
-        truthfulnessEvidence.innerHTML = '';
-        results.truthfulness.evidence.forEach((item, index) => {
-            const evidenceItem = document.createElement('div');
-            evidenceItem.className = 'evidence-item';
-            evidenceItem.style.animationDelay = `${index * 0.1}s`;
-            evidenceItem.innerHTML = `<p class="evidence-text evidence-${item.type}">${item.text}</p>`;
-            truthfulnessEvidence.appendChild(evidenceItem);
-        });
-
-        resultsSection.scrollIntoView({ behavior: 'smooth' });
-    }
-
-    function resetToInput() {
-        document.getElementById('text-area').value = '';
-        currentFile = null;
-        fileInput.value = '';
-        filePreview.style.display = 'none';
-        uploadArea.style.display = 'block';
-
-        inputSection.style.display = 'block';
-        loadingSection.style.display = 'none';
-        resultsSection.style.display = 'none';
-
-        inputSection.scrollIntoView({ behavior: 'smooth' });
-    }
+  document.documentElement.setAttribute('data-theme', newTheme);
+  localStorage.setItem('theme', newTheme);
+  updateThemeIcon(newTheme === 'dark' ? 'sun' : 'moon');
 });
+
+modeBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const mode = btn.getAttribute('data-mode');
+    switchMode(mode);
+  });
+});
+
+function switchMode(mode) {
+  currentMode = mode;
+  currentFile = null;
+
+  modeBtns.forEach(btn => {
+    if (btn.getAttribute('data-mode') === mode) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
+
+  inputContainers.forEach(container => {
+    if (container.getAttribute('data-input') === mode) {
+      container.classList.add('active');
+    } else {
+      container.classList.remove('active');
+    }
+  });
+
+  clearInputs();
+  hideResults();
+}
+
+function clearInputs() {
+  textInput.value = '';
+  imageInput.value = '';
+  audioInput.value = '';
+  videoInput.value = '';
+  imagePreview.innerHTML = '';
+  audioPreview.innerHTML = '';
+  videoPreview.innerHTML = '';
+  imagePreview.classList.remove('active');
+  audioPreview.classList.remove('active');
+  videoPreview.classList.remove('active');
+}
+
+imageInput.addEventListener('change', (e) => {
+  handleFileUpload(e, 'image', imagePreview);
+});
+
+audioInput.addEventListener('change', (e) => {
+  handleFileUpload(e, 'audio', audioPreview);
+});
+
+videoInput.addEventListener('change', (e) => {
+  handleFileUpload(e, 'video', videoPreview);
+});
+
+function handleFileUpload(event, type, previewElement) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  currentFile = file;
+
+  previewElement.innerHTML = '';
+
+  if (type === 'image') {
+    const img = document.createElement('img');
+    img.src = URL.createObjectURL(file);
+    previewElement.appendChild(img);
+  } else if (type === 'video') {
+    const video = document.createElement('video');
+    video.src = URL.createObjectURL(file);
+    video.controls = true;
+    previewElement.appendChild(video);
+  }
+
+  const fileInfo = document.createElement('div');
+  fileInfo.className = 'file-info';
+
+  const fileName = document.createElement('div');
+  fileName.className = 'file-name';
+  fileName.textContent = file.name;
+
+  const fileSize = document.createElement('div');
+  fileSize.className = 'file-size';
+  fileSize.textContent = formatFileSize(file.size);
+
+  fileInfo.appendChild(fileName);
+  fileInfo.appendChild(fileSize);
+  previewElement.appendChild(fileInfo);
+
+  previewElement.classList.add('active');
+}
+
+function formatFileSize(bytes) {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+}
+
+analyzeBtn.addEventListener('click', async () => {
+  if (!validateInput()) {
+    return;
+  }
+
+  showLoading();
+  hideResults();
+
+  await simulateAnalysis();
+
+  const results = generateMockResults();
+  displayResults(results);
+
+  hideLoading();
+  showResults();
+});
+
+function validateInput() {
+  if (currentMode === 'text') {
+    return textInput.value.trim().length > 0;
+  } else {
+    return currentFile !== null;
+  }
+}
+
+function showLoading() {
+  analyzeBtn.disabled = true;
+  loadingSpinner.classList.add('active');
+}
+
+function hideLoading() {
+  analyzeBtn.disabled = false;
+  loadingSpinner.classList.remove('active');
+}
+
+function hideResults() {
+  resultsSection.classList.remove('active');
+}
+
+function showResults() {
+  resultsSection.classList.add('active');
+  resultsSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function simulateAnalysis() {
+  return new Promise(resolve => {
+    setTimeout(resolve, 2000 + Math.random() * 1500);
+  });
+}
+
+function generateMockResults() {
+  const authenticityOptions = [
+    {
+      verdict: 'Likely Real',
+      confidence: 72 + Math.floor(Math.random() * 18),
+      evidence: [
+        'Consistent metadata patterns match expected camera profile',
+        'No detectable signs of AI-generated artifacts or manipulation',
+        'Natural noise distribution consistent with genuine capture device',
+        'Temporal consistency across frames shows no anomalies'
+      ],
+      limitations: [
+        'Advanced manipulation techniques may evade current detection methods',
+        'Limited historical data available for cross-reference verification',
+        'Cannot verify chain of custody or original source'
+      ]
+    },
+    {
+      verdict: 'Likely AI',
+      confidence: 65 + Math.floor(Math.random() * 20),
+      evidence: [
+        'Statistical patterns consistent with generative model outputs',
+        'Subtle artifacts detected in high-frequency analysis',
+        'Anomalous texture repetition in certain regions',
+        'Metadata inconsistencies suggest synthetic origin'
+      ],
+      limitations: [
+        'Newer generation models may produce fewer detectable artifacts',
+        'Cannot determine specific model or generation method used',
+        'Partial AI generation combined with real content harder to detect'
+      ]
+    },
+    {
+      verdict: 'Likely Edited',
+      confidence: 68 + Math.floor(Math.random() * 17),
+      evidence: [
+        'Discontinuities detected in compression artifacts',
+        'Multiple compression passes identified in forensic analysis',
+        'Color gradient inconsistencies suggest local modifications',
+        'Edge detection reveals cloning or splicing patterns'
+      ],
+      limitations: [
+        'Minor edits like cropping or color correction cannot be distinguished',
+        'Professional editing may leave minimal forensic traces',
+        'Cannot determine intent behind modifications'
+      ]
+    },
+    {
+      verdict: 'Uncertain',
+      confidence: 45 + Math.floor(Math.random() * 25),
+      evidence: [
+        'Mixed signals from multiple detection algorithms',
+        'Quality degradation limits forensic analysis capability',
+        'Some indicators present but below confidence threshold',
+        'Conflicting metadata patterns require further investigation'
+      ],
+      limitations: [
+        'Low resolution or heavy compression reduces detection accuracy',
+        'Limited context makes definitive assessment challenging',
+        'Multiple processing steps obscure original characteristics'
+      ]
+    }
+  ];
+
+  const credibilityOptions = [
+    {
+      verdict: 'Likely True',
+      confidence: 68 + Math.floor(Math.random() * 20),
+      evidence: [
+        'Core claims corroborated by multiple independent sources',
+        'Verifiable facts align with established databases and records',
+        'Contextual details consistent with known circumstances',
+        'Source has established credibility record'
+      ],
+      limitations: [
+        'Recent events may lack sufficient independent verification',
+        'Nuanced interpretations may vary across sources',
+        'Cannot verify subjective or opinion-based components'
+      ]
+    },
+    {
+      verdict: 'Likely False',
+      confidence: 70 + Math.floor(Math.random() * 18),
+      evidence: [
+        'Key claims contradicted by authoritative sources',
+        'Factual errors detected in verifiable statements',
+        'Similar content previously identified as misinformation',
+        'Lacks corroboration from credible independent sources'
+      ],
+      limitations: [
+        'Evolving situations may contain outdated but previously accurate info',
+        'Partial truths mixed with false claims complicate assessment',
+        'Satirical or hypothetical content may be misclassified'
+      ]
+    },
+    {
+      verdict: 'Mixed',
+      confidence: 55 + Math.floor(Math.random() * 20),
+      evidence: [
+        'Contains both verified accurate and inaccurate elements',
+        'Some claims supported while others lack evidence',
+        'Correct facts presented with misleading context or framing',
+        'Partial information omits relevant contradictory details'
+      ],
+      limitations: [
+        'Determining overall truthfulness requires subjective judgment',
+        'Misleading framing harder to detect than factual errors',
+        'Context-dependent interpretations may vary'
+      ]
+    },
+    {
+      verdict: 'Uncertain',
+      confidence: 40 + Math.floor(Math.random() * 25),
+      evidence: [
+        'Insufficient independent sources available for verification',
+        'Claims involve future predictions or unverifiable statements',
+        'Limited data prevents comprehensive fact-checking',
+        'Conflicting reports from different sources'
+      ],
+      limitations: [
+        'Breaking news may not yet have sufficient verification',
+        'Specialized or technical claims exceed available resources',
+        'Opinion-based or subjective content difficult to assess objectively'
+      ]
+    }
+  ];
+
+  const authenticity = authenticityOptions[Math.floor(Math.random() * authenticityOptions.length)];
+  const credibility = credibilityOptions[Math.floor(Math.random() * credibilityOptions.length)];
+
+  return { authenticity, credibility };
+}
+
+function displayResults(results) {
+  const { authenticity, credibility } = results;
+
+  displayAuthenticity(authenticity);
+  displayCredibility(credibility);
+
+  setTimeout(() => {
+    lucide.createIcons();
+  }, 100);
+}
+
+function displayAuthenticity(data) {
+  const verdictElement = document.querySelector('#authenticityVerdict .verdict-value');
+  verdictElement.textContent = data.verdict;
+  verdictElement.className = 'verdict-value ' + getVerdictClass(data.verdict);
+
+  const confidenceValue = document.getElementById('authenticityConfidence');
+  confidenceValue.textContent = data.confidence + '%';
+
+  const confidenceBar = document.getElementById('authenticityBar');
+  setTimeout(() => {
+    confidenceBar.style.width = data.confidence + '%';
+  }, 100);
+
+  const evidenceList = document.getElementById('authenticityEvidence');
+  evidenceList.innerHTML = data.evidence.map(item => `<li>${item}</li>`).join('');
+
+  const limitationsList = document.getElementById('authenticityLimitations');
+  limitationsList.innerHTML = data.limitations.map(item => `<li>${item}</li>`).join('');
+}
+
+function displayCredibility(data) {
+  const verdictElement = document.querySelector('#credibilityVerdict .verdict-value');
+  verdictElement.textContent = data.verdict;
+  verdictElement.className = 'verdict-value ' + getVerdictClass(data.verdict);
+
+  const confidenceValue = document.getElementById('credibilityConfidence');
+  confidenceValue.textContent = data.confidence + '%';
+
+  const confidenceBar = document.getElementById('credibilityBar');
+  setTimeout(() => {
+    confidenceBar.style.width = data.confidence + '%';
+  }, 100);
+
+  const evidenceList = document.getElementById('credibilityEvidence');
+  evidenceList.innerHTML = data.evidence.map(item => `<li>${item}</li>`).join('');
+
+  const limitationsList = document.getElementById('credibilityLimitations');
+  limitationsList.innerHTML = data.limitations.map(item => `<li>${item}</li>`).join('');
+}
+
+function getVerdictClass(verdict) {
+  const verdictLower = verdict.toLowerCase();
+  if (verdictLower.includes('real')) return 'real';
+  if (verdictLower.includes('ai')) return 'ai';
+  if (verdictLower.includes('edited')) return 'edited';
+  if (verdictLower.includes('true')) return 'true';
+  if (verdictLower.includes('false')) return 'false';
+  if (verdictLower.includes('mixed')) return 'mixed';
+  return 'uncertain';
+}
+
+initTheme();
+lucide.createIcons();
